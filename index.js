@@ -167,11 +167,13 @@ app.listen(port, () =>{
 */
 const express = require ('express')
 const uuid =  require('uuid')
+const cors = require ('cors')
 
 
-const port  = 4000
+const port  = 3001
 const app = express()
 app.use(express.json())
+app.use(cors())
 
 
 
@@ -191,15 +193,24 @@ const checkUserId = (request, reponse,next) => {
 
     next()
 }
-
-
 app.get('/users', (request, reponse) => {
     return reponse.json(users)
-
+    
 })
 
+/*
+
+TRATAMENTOS DE ERROS(TRY CATCH)
+
+*/
+
 app.post('/users', (request, reponse) => {
+
+    try{
     const {name, age, city} = request.body
+
+    //ACEITAR SO PESSOAS MAIORES DE 18 ANOS
+    // if(age < 18) throw new Error("Only allowed users over 18 years old")
 
     
     const user = { id:uuid.v4(), name, age, city}
@@ -207,6 +218,13 @@ app.post('/users', (request, reponse) => {
     users.push(user)
 
     return reponse.status(201).json(user)   
+    
+} catch(err){
+    return reponse.status(400).json({error:err.message})
+    /*FINALLY É OPCIONAL EXEMPLO ABAIXO*/
+}finally{
+    
+}
 
 })
 
@@ -243,7 +261,7 @@ app.put('/users/:id',checkUserId, (request, reponse) => {
 })
 
 //DELETE
-app.delete('/users/:id',checkUserId, (request, reponse) => {
+app.delete('/users/:id', checkUserId, (request, reponse) => {
 
     const index = request.userIndex
 
